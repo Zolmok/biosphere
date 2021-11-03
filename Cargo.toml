@@ -1,0 +1,11 @@
+[package]
+name = "biosphere"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+scuttle = { git = "https://github.com/socketwiz/scuttle", branch="main" }
+sys-info = "0.9"
+which = "4.2.2"
