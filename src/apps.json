@@ -1,64 +1,86 @@
 {
-  os: {
-    type: "linux",
-    releases: [
+  "os": {
+    "name": "linux",
+    "releases": [
       {
-        id: ["pop", "ubuntu"],
-        package_managers: [
+        "ids": ["pop", "ubuntu"],
+        "package_managers": [
           {
-            type: "apt-get",
-            meta: {
-              command: "sudo",
-              args: ["apt-get", "install", "-y"],
-              apps: ["tmux", "weechat", "shellcheck", "gimp", "krita", "openshot-qt", "magnus", "obs", "vlc", "xcolor", "flameshot", "peek"]
-            }
-          }
-        ]
-      },
-      {
-        id: ["arch"],
-        package_managers: [
-          {
-            type: "pacman",
-            meta: {
-              command: "sudo",
-              args: ["pacman", "-S"],
-              apps: ["tmux", "weechat", "shellcheck", "gimp", "krita", "openshot-qt", "magnus", "obs", "vlc", "xcolor", "flameshot", "peek"]
-            }
-          }
-        ]
-      },
-      {
-        id: ["shared"],
-        package_managers: [
-          {
-            type: "cargo",
-            meta: {
-              command: "cargo",
-              args: ["install"],
-              apps: ["exa", "bat", "gitui", "pastel", "dtool", "watchexec", "t-rec"]
+            "type": "apt-get",
+            "meta": {
+              "command": "sudo",
+              "args": ["apt-get", "install", "-y"],
+              "apps": ["tmux", "weechat", "shellcheck", "gimp", "krita", "openshot-qt", "magnus", "obs", "vlc", "xcolor", "flameshot", "peek"]
             }
           },
           {
-            type: "custom",
-            meta: {
-              apps: [{
-                name: "fzf",
-                commands: [
+            "type": "cargo",
+            "meta": {
+              "command": "cargo",
+              "args": ["install"],
+              "apps": ["exa", "bat", "gitui", "pastel", "dtool", "watchexec", "t-rec"]
+            }
+          },
+          {
+            "type": "custom",
+            "meta": {
+              "apps": [{
+                "name": "fzf",
+                "commands": [
                   {
-                    command: "git",
-                    args: ["clone", "--depth", "1", "https://github.com/junegunn/fzf.git", "~/.fzf"]
+                    "command": "git",
+                    "args": ["clone", "--depth", "1", "https://github.com/junegunn/fzf.git", "~/.fzf"]
                   },
                   {
-                    command: "~/.fzf/install",
-                    args: []
+                    "command": "~/.fzf/install",
+                    "args": []
                   }
                 ]
               }]
             }
           }
         ]
-      }]
+      },
+      {
+        "id": ["arch"],
+        "package_managers": [
+          {
+            "type": "pacman",
+            "meta": {
+              "command": "sudo",
+              "args": ["pacman", "-S"],
+              "apps": ["tmux", "weechat", "shellcheck", "gimp", "krita", "openshot-qt", "magnus", "obs", "vlc", "xcolor", "flameshot", "peek"]
+            }
+          },
+          {
+            "type": "cargo",
+            "meta": {
+              "command": "cargo",
+              "args": ["install"],
+              "apps": ["exa", "bat", "gitui", "pastel", "dtool", "watchexec", "t-rec"]
+            }
+          },
+          {
+            "type": "custom",
+            "meta": {
+              "apps": [{
+                "name": "fzf",
+                "commands": [
+                  {
+                    "command": "git",
+                    "args": ["clone", "--depth", "1", "https://github.com/junegunn/fzf.git", "~/.fzf"]
+                  },
+                  {
+                    "command": "~/.fzf/install",
+                    "args": []
+                  }
+                ]
+              }]
+            }
+          }
+        ]
+      }
     ]
   }
 }
+
