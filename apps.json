@@ -1,0 +1,45 @@
+{
+  "operating_systems": [
+    {
+      "name": "linux",
+      "versions": [
+        {
+          "types": ["pop", "ubuntu"],
+          "package_managers": [
+            {
+              "meta": {
+                "command": "sudo",
+                "args": ["apt-get", "install", "-y"],
+                "apps": ["tmux", "weechat", "shellcheck", "gimp", "krita", "openshot-qt", "magnus", "obs", "vlc", "xcolor", "flameshot", "peek"]
+              }
+            }
+          ]
+        },
+        {
+          "types": ["arch"],
+          "package_managers": [
+            {
+              "meta": {
+                "command": "sudo",
+                "args": ["pacman", "-S"],
+                "apps": ["tmux", "weechat", "shellcheck", "gimp", "krita", "openshot-qt", "magnus", "obs", "vlc", "xcolor", "flameshot", "peek"]
+              }
+            }
+          ]
+        },
+        {
+          "types": ["shared"],
+          "package_managers": [
+            {
+              "meta": {
+                "command": "cargo",
+                "args": ["install"],
+                "apps": ["exa", "bat", "gitui", "pastel", "dtool", "watchexec", "t-rec"]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

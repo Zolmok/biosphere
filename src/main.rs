@@ -1,103 +1,140 @@
+use clap::{App, Arg};
+use serde::Deserialize;
+
 use std::env::consts::OS;
+use std::fs::File;
+use std::io::BufReader;
+use std::path::Path;
+
+use sys_info::*;
 use which::which;
 
 extern crate scuttle;
 extern crate sys_info;
 
-use sys_info::*;
+#[derive(Clone, Deserialize, Debug)]
+struct Meta {
+    command: String,
+    args: Vec<String>,
+    apps: Vec<String>,
+}
 
-fn main() {
-    let packaged_apps: &[String] = &[
-        String::from("tmux"),
-        String::from("weechat"),
-        String::from("shellcheck"),
-        String::from("gimp"),
-        String::from("krita"),
-        String::from("openshot-qt"),
-        String::from("magnus"),
-        String::from("obs"),
-        String::from("vlc"),
-        String::from("xcolor"),
-        String::from("flameshot"),
-        String::from("peek"),
-    ];
-    let rust_apps: &[String] = &[
-        String::from("exa"),
-        String::from("bat"),
-        String::from("gitui"),
-        String::from("pastel"),
-        String::from("dtool"),
-        String::from("watchexec"),
-        String::from("t-rec"),
-    ];
-    let fzf_clone = scuttle::App {
-        command: String::from("git"),
-        args: vec!["clone", "--depth", "1", "https://github.com/junegunn/fzf.git", "~/.fzf"]
+#[derive(Clone, Deserialize, Debug)]
+struct PackageManager {
+    meta: Meta,
+}
+
+#[derive(Deserialize, Debug)]
+struct Version {
+    types: Vec<String>,
+    package_managers: Vec<PackageManager>,
+}
+
+#[derive(Deserialize, Debug)]
+struct OperatingSystem {
+    name: String,
+    versions: Vec<Version>,
+}
+
+#[derive(Deserialize, Debug)]
+struct Config {
+    operating_systems: Vec<OperatingSystem>,
+}
+
+fn read_config_from_file<P: AsRef<Path>>(path: P) -> Config {
+    // Open the file in read-only mode with buffer.
+    let file = match File::open(path) {
+        Ok(file) => file,
+        Err(error) => panic!("File not found: {}", error),
     };
-    let fzf_install = scuttle::App {
-        command: String::from("~/.fzf/install"),
-        args: vec![]
-    };
+    let reader = BufReader::new(file);
 
-    for packaged_app in packaged_apps.iter() {
-        match which(packaged_app) {
-            Ok(value) => {
-                println!("{} skipping, found here: {}", packaged_app, value.display());
-            },
-            Err(_error) => {
-                // install the app
-                if OS == "linux" {
-                    let release = match linux_os_release() {
-                        Ok(value) => value.id,
-                        Err(error) => panic!("Error {}", error)
-                    };
+    // Read the JSON contents of the file as an instance of `OS`.
+    match serde_json::from_reader(reader) {
+        Ok(config) => config,
+        Err(error) => panic!("Unable to parse json: {}", error),
+    }
+}
 
-                    match release.as_deref() {
-                        Some("pop") | Some("ubuntu") => {
-                            let package_manager = scuttle::App {
-                                command: String::from("sudo"),
-                                args: vec!["apt-get", "install", "-y", packaged_app]
-                            };
+fn get_package_manager(config: &Config) -> Vec<PackageManager> {
+    let operating_systems: &Vec<OperatingSystem> = &config.operating_systems;
+    let mut package_managers: Vec<PackageManager> = vec![];
 
-                            scuttle::run_app(&package_manager).unwrap();
-                        },
-                        Some("arch") => {
-                        },
-                        Some(&_) => panic!("ERROR: not sure what distribution this is"),
-                        None => panic!("ERROR: not sure what distribution this is")
+    operating_systems.iter().for_each(|operating_system| {
+        if OS == operating_system.name {
+            let release = match linux_os_release() {
+                Ok(value) => value.id,
+                Err(error) => panic!("Error {}", error),
+            };
+
+            operating_system.versions.iter().for_each(|version| {
+                version
+                    .types
+                    .iter()
+                    .for_each(|name| match release.as_deref() {
+                        Some(value) => {
+                            if value == name {
+                                package_managers = version.package_managers.to_vec();
+                            }
+                        }
+                        None => panic!("ERROR: not sure what distribution this is"),
+                    });
+            });
+        }
+        if OS == "macos" {}
+    });
+
+    package_managers
+}
+
+fn run() -> i32 {
+    let args = App::new("biosphere")
+	.version("0.1.0")
+	.about("Bootstrap your environment with your preferred apps")
+	.author("Ricky Nelson")
+	.args(&[
+	    Arg::new("config")
+		.short('c')
+		.long("config")
+		.takes_value(true),
+	]).get_matches();
+    let config_file: String = args.value_of_t("config").unwrap_or("".to_string());
+
+    if args.is_present("config") {
+        let config = read_config_from_file(config_file);
+        let package_manager: Vec<PackageManager> = get_package_manager(&config);
+
+        for package in package_manager.iter() {
+            for app in package.meta.apps.iter() {
+                let mut args = package.meta.args.to_owned();
+
+                match which(app) {
+                    Ok(value) => {
+                        println!("{} skipping, found here: {}", app, value.display());
+                    }
+                    Err(_error) => {
+                        args.push(app.to_string());
+
+                        // install the app
+                        let installer = scuttle::App {
+                            command: package.meta.command.to_owned(),
+                            // this is not my code, found this magic here
+                            // https://stackoverflow.com/questions/33216514/how-do-i-convert-a-vecstring-to-vecstr
+                            args: args.iter().map(|arg| &**arg).collect(),
+                        };
+
+                        scuttle::run_app(&installer).unwrap();
                     }
                 }
-
-                if OS == "macos" {
-                }
             }
         }
     }
 
-    for rust_app in rust_apps.iter() {
-        match which(rust_app) {
-            Ok(value) => {
-                println!("{} skipping, found here: {}", rust_app, value.display());
-            },
-            Err(_error) => {
-                let cargo_install = scuttle::App {
-                    command: String::from("cargo"),
-                    args: vec!["install", rust_app]
-                };
+    return 0;
+}
 
-                scuttle::run_app(&cargo_install).unwrap();
-            }
-        }
-    }
+fn main() {
+    let rc = run();
 
-    match which(String::from("fzf")) {
-        Ok(value) => {
-            println!("{} skipping, found here: {}", String::from("fzf"), value.display());
-        },
-        Err(_error) => {
-            let install_fzf: &[scuttle::App] = &[fzf_clone, fzf_install];
-
-            scuttle::run_apps(&install_fzf);
-        }
-    }
+    std::process::exit(rc);
 }

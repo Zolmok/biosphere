@@ -78,12 +78,14 @@ case $(uname) in
         ;;
     Linux)
         for app in clamav \
+                       dunst \
                        emacs \
                        git \
                        firefox \
                        flameshot \
                        fonts-firacode \
                        i3 \
+                       rofi \
                        ispell \
                        kitty \
                        peek \
@@ -91,9 +93,10 @@ case $(uname) in
                        gimp \
                        krita \
                        libffi-dev \
+                       libnotify-bin \
                        libssl-dev \
                        libx11-dev \
-                       libxcb-dev \
+                       libx11-xcb-dev \
                        libxcursor-dev \
                        libxss-dev \
                        magnus \
@@ -108,11 +111,13 @@ case $(uname) in
                        pulseaudio \
                        rsync \
                        shellcheck \
+                       systemtap-sdt-dev \
                        tmux \
                        vlc \
                        weechat \
                        wget \
                        youtube-dl \
+                       xsel \
                        zsh; do
             if [ "${RELEASE}" == pop ] || [ "${RELEASE}" == ubuntu  ]; then
                 if [ -z "$(which "${app}")" ]; then
@@ -215,8 +220,8 @@ fi
 # fix neovim
 if [ ! -f  "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim ]; then
     echo "Installing plugged"
-    sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs' \
-       'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+    sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
+       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
     nvim -c PlugInstall -c qall
 fi
 
@@ -279,6 +284,10 @@ if [ "${RELEASE}" == arch ]; then
     sudo usermod -aG wheel "${USER}"
 fi
 # change default shell to zsh
-if [ "$("$0")" != "-zsh" ]; then
+if [ "$(echo "$0")" != "-zsh" ]; then
     sudo chsh -s /usr/bin/zsh "${USER}"
 fi
+
+# setup npm packages locally
+export NPM_PACKAGES="$HOME/.npm-packages"
+echo "prefix = $NPM_PACKAGES" >> ~/.npmrc
