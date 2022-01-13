@@ -16,18 +16,20 @@ extern crate sys_info;
 struct Meta {
     command: String,
     args: Vec<String>,
-    apps: Vec<String>,
+    // use `Option` for optional value
+    // need to provide a default
+    apps: Option<Vec<String>>,
 }
 
 #[derive(Clone, Deserialize, Debug)]
-struct PackageManager {
+struct Command {
     meta: Meta,
 }
 
 #[derive(Deserialize, Debug)]
 struct Version {
     types: Vec<String>,
-    package_managers: Vec<PackageManager>,
+    commands: Vec<Command>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -56,9 +58,9 @@ fn read_config_from_file<P: AsRef<Path>>(path: P) -> Config {
     }
 }
 
-fn get_package_manager(config: &Config) -> Vec<PackageManager> {
+fn get_command(config: &Config) -> Vec<Command> {
     let operating_systems: &Vec<OperatingSystem> = &config.operating_systems;
-    let mut package_managers: Vec<PackageManager> = vec![];
+    let mut commands: Vec<Command> = vec![];
 
     operating_systems.iter().for_each(|operating_system| {
         if OS == operating_system.name {
@@ -74,7 +76,7 @@ fn get_package_manager(config: &Config) -> Vec<PackageManager> {
                     .for_each(|name| match release.as_deref() {
                         Some(value) => {
                             if value == name {
-                                package_managers = version.package_managers.to_vec();
+                                commands = version.commands.to_vec();
                             }
                         }
                         None => panic!("ERROR: not sure what distribution this is"),
@@ -84,7 +86,7 @@ fn get_package_manager(config: &Config) -> Vec<PackageManager> {
         if OS == "macos" {}
     });
 
-    package_managers
+    commands
 }
 
 fn run() -> i32 {
@@ -102,29 +104,47 @@ fn run() -> i32 {
 
     if args.is_present("config") {
         let config = read_config_from_file(config_file);
-        let package_manager: Vec<PackageManager> = get_package_manager(&config);
+        let command: Vec<Command> = get_command(&config);
 
-        for package in package_manager.iter() {
-            for app in package.meta.apps.iter() {
-                let mut args = package.meta.args.to_owned();
+        for package in command.iter() {
+            let mut args = package.meta.args.to_owned();
+            let apps = match package.meta.apps.to_owned() {
+                Some(value) => value,
+                None => vec![] // default value
+            };
 
-                match which(app) {
-                    Ok(value) => {
-                        println!("{} skipping, found here: {}", app, value.display());
+            if apps.len() > 0 {
+                for app in apps.iter() {
+                    match which(app) {
+                        Ok(value) => {
+                            println!("{} skipping, found here: {}", app, value.display());
+                        }
+                        Err(_error) => {
+                            args.push(app.to_string());
+
+                            // install the app
+                            let installer = scuttle::App {
+                                command: package.meta.command.to_owned(),
+                                // this is not my code, found this magic here
+                                // https://stackoverflow.com/questions/33216514/how-do-i-convert-a-vecstring-to-vecstr
+                                args: args.iter().map(|arg| &**arg).collect(),
+                            };
+
+                            scuttle::run_app(&installer).unwrap();
+                        }
                     }
-                    Err(_error) => {
-                        args.push(app.to_string());
+                }
+            } else {
+                if args.len() > 0 {
+                    // this is just a command, no app to install, just run it
+                    let installer = scuttle::App {
+                        command: package.meta.command.to_owned(),
+                        // this is not my code, found this magic here
+                        // https://stackoverflow.com/questions/33216514/how-do-i-convert-a-vecstring-to-vecstr
+                        args: args.iter().map(|arg| &**arg).collect(),
+                    };
 
-                        // install the app
-                        let installer = scuttle::App {
-                            command: package.meta.command.to_owned(),
-                            // this is not my code, found this magic here
-                            // https://stackoverflow.com/questions/33216514/how-do-i-convert-a-vecstring-to-vecstr
-                            args: args.iter().map(|arg| &**arg).collect(),
-                        };
-
-                        scuttle::run_app(&installer).unwrap();
-                    }
+                    scuttle::run_app(&installer).unwrap();
                 }
             }
         }
