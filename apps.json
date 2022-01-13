@@ -5,7 +5,7 @@
       "versions": [
         {
           "types": ["pop", "ubuntu"],
-          "package_managers": [
+          "commands": [
             {
               "meta": {
                 "command": "sudo",
@@ -90,7 +90,7 @@
         },
         {
           "types": ["arch"],
-          "package_managers": [
+          "commands": [
             {
               "meta": {
                 "command": "sudo",
@@ -102,7 +102,7 @@
         },
         {
           "types": ["shared"],
-          "package_managers": [
+          "commands": [
             {
               "meta": {
                 "command": "cargo",
