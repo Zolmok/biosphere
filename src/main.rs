@@ -91,15 +91,14 @@ fn get_command(config: &Config) -> Vec<Command> {
 
 fn run() -> i32 {
     let args = App::new("biosphere")
-	.version("0.1.0")
-	.about("Bootstrap your environment with your preferred apps")
-	.author("Ricky Nelson")
-	.args(&[
-	    Arg::new("config")
-		.short('c')
-		.long("config")
-		.takes_value(true),
-	]).get_matches();
+        .version("0.1.0")
+        .about("Bootstrap your environment with your preferred apps")
+        .author("Ricky Nelson")
+        .args(&[Arg::new("config")
+            .short('c')
+            .long("config")
+            .takes_value(true)])
+        .get_matches();
     let config_file: String = args.value_of_t("config").unwrap_or("".to_string());
 
     if args.is_present("config") {
@@ -110,7 +109,7 @@ fn run() -> i32 {
             let mut args = package.meta.args.to_owned();
             let apps = match package.meta.apps.to_owned() {
                 Some(value) => value,
-                None => vec![] // default value
+                None => vec![], // default value
             };
 
             if apps.len() > 0 {
@@ -125,9 +124,7 @@ fn run() -> i32 {
                             // install the app
                             let installer = scuttle::App {
                                 command: package.meta.command.to_owned(),
-                                // this is not my code, found this magic here
-                                // https://stackoverflow.com/questions/33216514/how-do-i-convert-a-vecstring-to-vecstr
-                                args: args.iter().map(|arg| &**arg).collect(),
+                                args: args.iter().map(String::from).collect(),
                             };
 
                             scuttle::run_app(&installer).unwrap();
@@ -139,9 +136,7 @@ fn run() -> i32 {
                     // this is just a command, no app to install, just run it
                     let installer = scuttle::App {
                         command: package.meta.command.to_owned(),
-                        // this is not my code, found this magic here
-                        // https://stackoverflow.com/questions/33216514/how-do-i-convert-a-vecstring-to-vecstr
-                        args: args.iter().map(|arg| &**arg).collect(),
+                        args: args.iter().map(String::from).collect(),
                     };
 
                     scuttle::run_app(&installer).unwrap();

@@ -180,7 +180,7 @@ if [ -z "$(which rustup)" ]; then
     source "$HOME/.cargo/env"
 fi
 # rust apps
-for app in bat dtool exa gitui pastel ripgrep starship t-rec watchexec-cli xcolor; do
+for app in bat cargo-watch dtool exa gitui pastel ripgrep starship t-rec watchexec-cli xcolor; do
     if [ "${app}" == ripgrep ]; then
         if [ -z "$(which rg)" ]; then
             cargo install "${app}"
