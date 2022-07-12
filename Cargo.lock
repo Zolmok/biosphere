@@ -21,7 +21,7 @@ checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 
 [[package]]
 name = "biosphere"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "clap",
  "scuttle",
@@ -148,8 +148,8 @@ checksum = "73b4b750c782965c211b42f022f59af1fbceabdd026623714f104152f1ec149f"
 
 [[package]]
 name = "scuttle"
-version = "0.2.0"
-source = "git+https://github.com/Zolmok/scuttle?branch=main#ce732edd6f43943a1fd7e87898a855c4e54d4f34"
+version = "0.4.0"
+source = "git+https://github.com/Zolmok/scuttle?tag=v0.4.0#9a183a9c303e83d2bfa90a3f7fc9ec740f45afbe"
 
 [[package]]
 name = "serde"

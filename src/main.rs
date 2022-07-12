@@ -127,7 +127,7 @@ fn run() -> i32 {
                                 args: args.iter().map(String::from).collect(),
                             };
 
-                            scuttle::run_app(&installer).unwrap();
+                            scuttle::run_status(&installer).unwrap();
                         }
                     }
                 }
@@ -139,7 +139,7 @@ fn run() -> i32 {
                         args: args.iter().map(String::from).collect(),
                     };
 
-                    scuttle::run_app(&installer).unwrap();
+                    scuttle::run_status(&installer).unwrap();
                 }
             }
         }
