@@ -103,7 +103,6 @@ case $(uname) in
                        neovim \
                        nmap \
                        obs-studio \
-                       openshot-qt \
                        openssh-client \
                        pkg-config \
                        python3 \
