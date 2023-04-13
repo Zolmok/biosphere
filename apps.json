@@ -150,7 +150,7 @@
                 "apps": [
                   "bacon",
                   "bat",
-                  "bob",
+                  "bob-nvim",
                   "cargo-asm",
                   "cargo-expand",
                   "cargo-watch",
