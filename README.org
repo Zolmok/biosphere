@@ -1,22 +1,41 @@
 * Biosphere
-  biosphere is largely a learning project.  I'm trying to learn Rust
-  and I've been slowly working through my scripts rewriting them all
-  in Rust as a learning experiment.  This app takes as input a JSON
-  file that describes what apps to install on various systems. You
-  could think of it like a really terrible ansible.
 
-* Quick start
-#+BEGIN_SRC shell 
-  $ git clone git@github.com:Zolmok/biosphere.git
-  $ cd biosphere
-  $ cargo install --path .
+Biosphere is a simple CLI tool to bootstrap development environments across multiple operating systems.
+
+It's primarily a learning project: I'm teaching myself Rust by converting old scripts into something more structured and robust. You can think of it as a (very minimal) alternative to Ansible or Brewfiles — but JSON-based and written entirely in Rust.
+
+Given a JSON config file that specifies which apps to install per OS/distro, Biosphere will:
+- Detect your OS (and Linux distro, if applicable)
+- Look up relevant commands and apps
+- Run them (or simulate with `--dry-run`)
+
+* Quick Start
+
+#+BEGIN_SRC shell
+$ git clone git@github.com:Zolmok/biosphere.git
+$ cd biosphere
+$ cargo install --path .
 #+END_SRC
 
-* Configuration format
-  The configuration is a JSON file with the following format
+* Running It
+
+To install apps based on your configuration file:
+
+#+BEGIN_SRC bash
+$ biosphere --config /path/to/apps.json
+#+END_SRC
+
+To preview what would be executed (no changes made):
+
+#+BEGIN_SRC bash
+$ biosphere --config /path/to/apps.json --dry-run
+#+END_SRC
+
+* Configuration Format
+
+Your configuration file (`apps.json`) should look like this:
 
 #+BEGIN_SRC json
-// apps.json
 {
   "operating_systems": [
     {
@@ -38,8 +57,8 @@
                 "apps": [
                   "clamav",
                   "curl",
-                  "emacs",
-                  ...
+                  "emacs"
+                  // ...
                 ]
               }
             }
@@ -51,8 +70,12 @@
 }
 #+END_SRC
 
-To run and install the apps from your configuration
+Each command entry has:
+- a `command` (e.g. `sudo`)
+- optional `args` (e.g. `["apt-get", "install", "-y"]`)
+- optional `apps`: a list of packages appended to `args` for each app not already installed
 
-#+BEGIN_SRC bash 
-$ biosphere --config /path/to/apps.json
-#+END_SRC bash
+* Contributions
+
+This is a learning tool — but if you find it helpful, have suggestions, or want to add support for more distros (macOS, Arch, Windows WSL, etc.), PRs are welcome!
+

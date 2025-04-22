@@ -2,14 +2,20 @@
   "session": "biosphere",
   "windows": [
     {
-      "name": "Build",
-      "actions": ["cargo watch -x test -x build"],
+      "name": "Code",
+      "actions": [],
       "pwd": ".",
       "select": true
     },
     {
-      "name": "Code",
+      "name": "Build",
       "actions": [],
+      "pwd": ".",
+      "select": false
+    },
+    {
+      "name": "Test",
+      "actions": ["cargo watch -x test"],
       "pwd": ".",
       "select": false
     },
